@@ -1,10 +1,13 @@
-require 'webrick'
+require "webrick"
 require 'json'
+require 'erb'
+
+JSON_FILE = File.dirname(__FILE__) + "/my_dict.json"
 
 class Dictionary < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(request, response)
-    words = File.readlines("my_dict.json")
-    words.sort!
+    array = JSON.parse(File.read(JSON_FILE))
+    array.sort!
 
     response.status = 200
     response.body = %(
@@ -41,7 +44,7 @@ class Dictionary < WEBrick::HTTPServlet::AbstractServlet
           Don't see a word here? <a href="/add">ADD</a> it to make this site better!
         </div>
           <p>
-            #{words.join("<br/>")}
+            #{array.join("<br>")}
           </p>
       </body>
     </html>
@@ -72,10 +75,9 @@ end
 
 class SaveWord < WEBrick::HTTPServlet::AbstractServlet
   def do_POST(request, response)
-    File.open("my_dict.json", "a+") do |input|
-      input.puts "#{request.query["word"]}"
-    end
-
+    array = JSON.parse(File.read(JSON_FILE))
+    array << "#{request.query["word"]}"
+    File.write(JSON_FILE, array.to_json)
     response.status = 302
     response.header["Location"] = "/"
     response.body = "Saved"
@@ -84,12 +86,12 @@ end
 
 class SearchWord < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(request, response)
-    lines = File.open("my_dict.json")
-      chomped = lines.map do |line|
-        line.chomp
-      end
-      found = chomped.select do |match|
-        match == request.query["search"]
+    array = JSON.parse(File.read(JSON_FILE))
+      # chomped = lines.map do |line|
+      #   line.chomp
+      # end
+      found = array.select do |match|
+        match.start_with?(request.query["search"])
       end
 
     response.status = 200
@@ -101,7 +103,7 @@ class SearchWord < WEBrick::HTTPServlet::AbstractServlet
     <body>
     <a href="/">BACK HOME</a>
       <h3>I've found your words!</h3>
-      #{found[0]}
+      #{found.join("<br>")}
     </body>
     </html>
     )
@@ -113,7 +115,6 @@ server.mount "/", Dictionary
 server.mount "/add", AddWord
 server.mount "/save", SaveWord
 server.mount "/search", SearchWord
-
 trap("INT") { server.shutdown }
 
 server.start
