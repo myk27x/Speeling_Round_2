@@ -10,45 +10,7 @@ class Dictionary < WEBrick::HTTPServlet::AbstractServlet
     array.sort!
 
     response.status = 200
-    response.body = %(
-    <html>
-      <head>
-        <title>The Urban Urban Dictionary</title>
-        <style>
-          h1 {
-              text-align:center
-             }
-          h3 {
-              text-align:center
-             }
-          p  {
-             padding-left: 20px;
-             font-size: 24px
-             }
-          a:visited {
-              color: blue;
-             }
-        </style>
-      </head>
-      <body>
-        <h1>Welome to The Urban Urban Dictionary</h1>
-        <h3>'Your Dictionary the way you want it!'</h3>
-        <div>
-          <form method="GET" action="/search">
-          Looking for a word?
-            <input name = "search">
-            <button type="submit">SHOW ME</button>
-          </form>
-        </div>
-        <div>
-          Don't see a word here? <a href="/add">ADD</a> it to make this site better!
-        </div>
-          <p>
-            #{array.join("<br>")}
-          </p>
-      </body>
-    </html>
-    )
+    response.body = ERB.new(File.read("templates/home.html.erb")).result(binding)
   end
 end
 
@@ -56,20 +18,7 @@ class AddWord < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(request, response)
 
     response.status = 200
-    response.body = %(
-    <html>
-      <head>
-      <title>The Urban Urban Dictionary</title>
-      </head>
-      <body>
-        <h1>Thank you for your contribution!</h1>
-        <form method="POST" action="/save">
-          <input name = "word">
-          <button type="submit">ADD</button>
-        </form>
-      </body>
-    </html>
-    )
+    response.body = ERB.new(File.read("templates/add.html.erb")).result(binding)
   end
 end
 
@@ -78,6 +27,7 @@ class SaveWord < WEBrick::HTTPServlet::AbstractServlet
     array = JSON.parse(File.read(JSON_FILE))
     array << "#{request.query["word"]}"
     File.write(JSON_FILE, array.to_json)
+
     response.status = 302
     response.header["Location"] = "/"
     response.body = "Saved"
@@ -95,18 +45,7 @@ class SearchWord < WEBrick::HTTPServlet::AbstractServlet
       end
 
     response.status = 200
-    response.body = %(
-    <html>
-    <head>
-      <title>...and ye shall receive.</title>
-    </head>
-    <body>
-    <a href="/">BACK HOME</a>
-      <h3>I've found your words!</h3>
-      #{found.join("<br>")}
-    </body>
-    </html>
-    )
+    response.body = ERB.new(File.read("templates/search.html.erb")).result(binding)
   end
 end
 

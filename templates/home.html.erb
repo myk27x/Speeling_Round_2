@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <title>The Urban Urban Dictionary</title>
+    <style>
+      h1 {
+          text-align:center
+         }
+      h3 {
+          text-align:center
+         }
+      p  {
+         padding-left: 20px;
+         font-size: 24px
+         }
+      a:visited {
+          color: blue;
+         }
+    </style>
+  </head>
+  <body>
+    <h1>Welome to The Urban Urban Dictionary</h1>
+    <h3>'Your Dictionary the way you want it!'</h3>
+    <div>
+      <form method="GET" action="/search">
+      Looking for a word?
+        <input name = "search">
+        <button type="submit">SHOW ME</button>
+      </form>
+    </div>
+    <div>
+      Don't see a word here? <a href="/add">ADD</a> it to make this site better!
+    </div>
+      <p>
+        <%= array.join("<br>") %>
+      </p>
+  </body>
+</html>
